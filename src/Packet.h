@@ -4,7 +4,10 @@
 #include <Arduino.h>
 #include <FastCRC.h>
 
+
+#if PACKET_STACK_SIZE == 0
 #define BUFFER_INIT_SIZE 32
+#endif
 #define HEAD1 0xAB
 #define HEAD2 0xCD
 
@@ -13,11 +16,20 @@
 
 class Packet {
 private:
+#if PACKET_STACK_SIZE == 0
+  uint32_t cap = BUFFER_INIT_SIZE;
+#else
   uint32_t cap;
+#endif
 protected:
   FastCRC16 CRC16;
   uint16_t len;
+
+#if PACKET_STACK_SIZE == 0
   uint8_t* data;
+#else
+  uint8_t data[PACKET_STACK_SIZE];
+#endif
 
 public:
   Packet();

@@ -1,9 +1,11 @@
 #include <Packet.h>
 
 Packet::Packet() {
-  cap = 32;
+#if PACKET_STACK_SIZE == 0
+  cap = BUFFER_INIT_SIZE;
   len = 0;
   data = (uint8_t*)malloc(cap * sizeof(uint8_t));
+#endif
 }
 
 Packet::Packet(uint8_t* payload, uint16_t buffSize) {
@@ -11,9 +13,14 @@ Packet::Packet(uint8_t* payload, uint16_t buffSize) {
     Packet();
     return;
   }
+
+#if PACKET_STACK_SIZE == 0
+  cap = BUFFER_INIT_SIZE;
+  len = 0;
   while (cap < buffSize + 8)
     cap <<= 1;
   data = (uint8_t*)malloc(cap * sizeof(uint8_t));
+#endif
 
   data[0] = HEAD1;
   data[1] = HEAD2;
@@ -21,7 +28,11 @@ Packet::Packet(uint8_t* payload, uint16_t buffSize) {
   FastCRC16 CRC16;
   uint16_t crc = CRC16.kermit(payload, buffSize);
 
+#if PACKET_STACK_SIZE == 0
   for (size_t i = 0; i < buffSize; ++i)
+#else
+  for (size_t i = 0; i < min(buffSize, (uint16_t)PACKET_STACK_SIZE); ++i)
+#endif
     data[i + 2] = payload[i];
 
   data[buffSize + 2] = highByte(crc);
@@ -29,10 +40,17 @@ Packet::Packet(uint8_t* payload, uint16_t buffSize) {
 
   data[buffSize + 4] = FOOT1;
   data[buffSize + 5] = FOOT2;
+
+  len = buffSize + 8;
 }
 
 Packet::~Packet() {
-  free(data);
+#if PACKET_STACK_SIZE == 0
+  if (data != nullptr) {
+    free(data);
+    data = nullptr;
+  }
+#endif
 }
 
 uint16_t Packet::size() { return len; }
@@ -60,10 +78,14 @@ bool Packet::checkCRC() {
 }
 
 void Packet::insertPacket(uint8_t* buf, uint16_t buffSize) {
+#if PACKET_STACK_SIZE == 0
   while (cap < buffSize + 8)
     cap <<= 1;
   data = (uint8_t*)realloc(data, cap * sizeof(uint8_t));
   for (uint16_t i = 0; i < buffSize; ++i)
+#else
+  for (uint16_t i = 0; i < min(buffSize, (uint16_t)PACKET_STACK_SIZE); ++i)
+#endif
     data[i] = buf[i];
   len = buffSize;
 }
@@ -90,9 +112,14 @@ bool Packet::isValid() {
 
 void Packet::clear() {
   len = 0;
-  cap = 32;
-  free(data);
+#if PACKET_STACK_SIZE == 0
+  cap = BUFFER_INIT_SIZE;
+  if (data != nullptr) {
+    free(data);
+    data = nullptr;
+  }
   data = (uint8_t*)malloc(cap * sizeof(uint8_t));
+#endif
 }
 
 Packet Packet::operator= (Packet a) {

@@ -1,7 +1,7 @@
 {
 	"name": "Packet",
 	"version": "0.0.1",
-	"description": "A communication protocol uses a data structure with a CRC16 check, a 0xABCD header, and a 0xDCBA footer to ensure data integrity.",
+	"description": "A simple packet management library for Arduino and other embedded platforms designed for various communication protocols like Serial, Radio Signal, and LoRa.",
 	"keywords": "serial, messaging, radio signal, LoRa, arduino",
 	"authors": {
 		"name": "Dugar Badagarov",
@@ -9,7 +9,7 @@
 	},
 	"frameworks": "*",
 	"platforms": "*",
-    "dependencies": {
-        "frankboesing/FastCRC": "^1.41"
-    }
+	"dependencies": {
+		"frankboesing/FastCRC": "^1.41"
+	}
 }
