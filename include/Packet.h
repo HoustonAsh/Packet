@@ -4,6 +4,26 @@
 #include <Arduino.h>
 #include <FastCRC.h>
 
+#define bytesToInt64(buf, startIndex) \
+(((int64_t)*buf[startIndex] << 56LL) | \
+ ((int64_t)*buf[startIndex + 1] << 48LL) | \
+ ((int64_t)*buf[startIndex + 2] << 40LL) | \
+ ((int64_t)*buf[startIndex + 3] << 32LL) | \
+ ((int64_t)*buf[startIndex + 4] << 24LL) | \
+ ((int64_t)*buf[startIndex + 5] << 16LL) | \
+ ((int64_t)*buf[startIndex + 6] << 8LL)  | \
+  (int64_t)*buf[startIndex + 7])
+
+#define bytesToInt32(buf, startIndex) \
+(((int32_t)*buf[startIndex] << 24) | \
+ ((int32_t)*buf[startIndex + 1] << 16) | \
+ ((int32_t)*buf[startIndex + 2] << 8)  | \
+  (int32_t)*buf[startIndex + 3])
+
+
+#define bytesToInt16(buf, startIndex) (((int16_t)*buf[startIndex] << 8)  | (int16_t)*buf[startIndex + 1])
+#define intToByte(v, i) (uint8_t)(v >> 8*i & 0xff)
+
 
 #if PACKET_STACK_SIZE == 0
 #define BUFFER_INIT_SIZE 32
