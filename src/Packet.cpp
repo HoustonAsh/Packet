@@ -55,14 +55,11 @@ Packet::~Packet() {
 
 uint16_t Packet::size() { return len; }
 
-uint8_t* Packet::operator[] (int i) {
-  if (i >= len || i < -len)
-    return nullptr;
-
+uint8_t Packet::operator[] (int i) {
   if (i < 0)
-    return &data[len + i];
+    return data[len + i];
 
-  return &data[i];
+  return data[i];
 }
 
 bool Packet::checkCRC() {
