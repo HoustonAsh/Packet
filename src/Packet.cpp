@@ -84,7 +84,7 @@ void Packet::fixCRC() {
 bool Packet::isValid() {
   return len > 8 &&
     data[0] == HEAD1 && data[1] == HEAD2 &&
-    data[len - 1] == FOOT1 && data[len - 2] == FOOT2 &&
+    data[len - 2] == FOOT1 && data[len - 1] == FOOT2 &&
     checkCRC();
 }
 
