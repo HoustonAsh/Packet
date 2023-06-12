@@ -24,8 +24,9 @@
 #define bytesToInt16(buf, startIndex) (((int16_t)buf[startIndex] << 8)  | (int16_t)buf[startIndex + 1])
 #define intToByte(v, i) (uint8_t)(v >> 8*i & 0xff)
 
+#define PACKET_STACK_SIZE 128
 
-#if PACKET_STACK_SIZE == 0
+#ifdef HEAP_PACKET
 #define BUFFER_INIT_SIZE 32
 #endif
 #define HEAD1 0xAB
@@ -36,7 +37,7 @@
 
 class Packet {
 private:
-#if PACKET_STACK_SIZE == 0
+#ifdef HEAP_PACKET
   uint32_t cap = BUFFER_INIT_SIZE;
 #else
   uint32_t cap;
@@ -45,7 +46,7 @@ protected:
   FastCRC16 CRC16;
   uint16_t len;
 
-#if PACKET_STACK_SIZE == 0
+#ifdef HEAP_PACKET
   uint8_t* data;
 #else
   uint8_t data[PACKET_STACK_SIZE];
@@ -58,7 +59,7 @@ public:
   uint16_t size();
 
   uint8_t operator[] (int i);
-  Packet operator= (Packet a);
+  Packet& operator= (Packet& a);
   void fixCRC();
   void insertPacket(uint8_t* buf, uint16_t bufferSize);
   bool checkCRC();
