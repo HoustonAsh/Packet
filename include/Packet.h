@@ -21,52 +21,69 @@
   (int32_t)buf[startIndex + 3])
 
 
+#define intToBCD(x) x + (x/10)*6
+#define BCDtoInt(x) x - (x/16)*6
+
 #define bytesToInt16(buf, startIndex) (((int16_t)buf[startIndex] << 8)  | (int16_t)buf[startIndex + 1])
 #define intToByte(v, i) (uint8_t)(v >> 8*i & 0xff)
 
+#ifndef PACKET_BUFFER_SIZE
 #define PACKET_STACK_SIZE 128
-
-#ifdef HEAP_PACKET
-#define BUFFER_INIT_SIZE 32
 #endif
-#define HEAD1 0xAB
-#define HEAD2 0xCD
 
-#define FOOT1 0xDC
-#define FOOT2 0xBA
+#define HEAD_SIZE 8
+#define TAIL_SIZE 8
 
 class Packet {
 private:
-#ifdef HEAP_PACKET
-  uint32_t cap = BUFFER_INIT_SIZE;
+#ifdef PACKET_BUFFER_SIZE
+  uint32_t cap = PACKET_BUFFER_SIZE;
 #else
   uint32_t cap;
 #endif
 protected:
   FastCRC16 CRC16;
   uint16_t len;
+  bool isBigEndianCRC;
 
-#ifdef HEAP_PACKET
+#ifdef PACKET_BUFFER_SIZE
   uint8_t* data;
 #else
   uint8_t data[PACKET_STACK_SIZE];
 #endif
 
+  uint8_t head[HEAD_SIZE] = { 0xAB, 0xCD };
+  int headLen = 2;
+  uint8_t tail[TAIL_SIZE] = { 0xDC, 0xBA };
+  int tailLen = 2;
+
 public:
   Packet();
-  Packet(uint8_t* payload, uint16_t buffSize);
+  Packet(
+    uint8_t* payload, uint16_t buffSize, 
+    bool isBigEndianCRC = false, 
+    uint8_t* head = nullptr, int headLen = 0, 
+    uint8_t* tail = nullptr, int tailLen = 0
+  );
+
   ~Packet();
   uint16_t size();
 
   uint8_t operator[] (int i);
   Packet& operator= (Packet& a);
-  void fixCRC();
-  void insertPacket(uint8_t* buf, uint16_t bufferSize);
+  Packet& fixCRC();
+  Packet& insertPacket(
+    uint8_t* buf, uint16_t bufferSize, 
+    bool isBigEndianCRC = false, 
+    uint8_t* head = nullptr, int headLen = 0, 
+    uint8_t* tail = nullptr, int tailLen = 0
+  );
+
   bool checkCRC();
   bool isValid();
-  void clear();
+  Packet& clear();
 
-  void print();
+  Packet& print();
 
   uint8_t* getData();
 };

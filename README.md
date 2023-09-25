@@ -1,35 +1,42 @@
 # Packet
 
-A simple packet management library for Arduino and other embedded platforms designed for various communication protocols like Serial, Radio Signal, and LoRa.
+A simple packet management library for Arduino and other embedded platforms designed for various communication protocols.
 
 ## Usage
 
-- CRC validation and fix:
-
+- In general:
   ```cpp
-  Packet p;
-  ...
-  if (p.isValid())
-    p.fixCRC();
+  const uint8_t buffSize = 16
+  uint8_t buff[buffSize] = {...}  
+  Packet p(buff, buffSize);
+
+  //if you need custom head and tail:
+  uint8_t h[2] = {0x14, 0xBB};
+  uint8_t t[2] = {0x88, 0xA1};
+  Packet p(buff, buffSize, false, h, 2, t, 2);
+
+  //if you need to create Packet instance from buffer:
+  p.insertPacket(buff, buffSize, false, h, 2, t, 2)
+   .fixCRC()
+   .print();
+
+  if (p.isValid()) {
+    ...
+  }
   ```
 
-</br>
-
-- Choose where allocate memory:
-  
-  By default, memory for data will be allocated on the heap. If you want to use stack memory (for any reason), add this line to your platformio.ini file:
+- By default, memory for data will be allocated on the stack. If you want to use heap memory, add this line to your platformio.ini file:
 
   ```ts
-  build_flags = -DPACKET_STACK_SIZE=128
+  build_flags = -DPACKET_BUFFER_SIZE=128
   ```
 
-  Or if you use ArduinoIDE define PACKET_STACK_SIZE <u>**before**</u> including Packet.h:
+  Or if you use ArduinoIDE define PACKET_BUFFER_SIZE <u>**before**</u> including Packet.h:
 
   ```cpp
-  #define PACKET_STACK_SIZE 128
+  #define PACKET_BUFFER_SIZE 128
   #include <Packet.h>
   ```
 
-</br>
 
-- Note that operator '=' creates a copy of right operand
+- Note: operator '=' creates a copy
