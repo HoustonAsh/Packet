@@ -1,5 +1,7 @@
 #include <Packet.h>
 
+FastCRC16 fastCRC;
+
 Packet::Packet() {
 #ifdef PACKET_BUFFER_SIZE
   cap = PACKET_BUFFER_SIZE;
@@ -11,9 +13,11 @@ Packet::Packet() {
 Packet::Packet(
   uint8_t* payload, uint16_t buffSize,
   bool isBigEndianCRC,
-  uint8_t* head, int headLen,
-  uint8_t* tail, int tailLen
+  uint8_t* head, uint8_t headLen,
+  uint8_t* tail, uint8_t tailLen,
+  CrcFunc crcF
 ) {
+  this->crcFunc = crcF;
   this->isBigEndianCRC = isBigEndianCRC;
   if (head != nullptr) memcpy(this->head, head, headLen);
   if (tail != nullptr) memcpy(this->tail, tail, tailLen);
@@ -29,7 +33,7 @@ Packet::Packet(
   memcpy(data, this->head, this->headLen);
   memcpy(data + this->headLen, payload, buffSize);
 
-  uint16_t crc = CRC16.kermit(payload, buffSize);
+  uint16_t crc = crcFunc(payload, buffSize);
   data[buffSize + this->headLen] = isBigEndianCRC ? highByte(crc) : lowByte(crc);
   data[buffSize + this->headLen + 1] = isBigEndianCRC ? lowByte(crc) : highByte(crc);
   memcpy(data + buffSize + this->headLen + 2, this->tail, this->tailLen);
@@ -57,7 +61,8 @@ bool Packet::checkCRC() {
   uint16_t crc = isBigEndianCRC
     ? makeWord(data[crcIndexEnd - 2], data[crcIndexEnd - 1])
     : makeWord(data[crcIndexEnd - 1], data[crcIndexEnd - 2]);
-  return CRC16.kermit(data + headLen, crcIndexEnd - headLen - 2) == crc;
+
+  return crcFunc(data + headLen, crcIndexEnd - headLen - 2) == crc;
 }
 
 Packet& Packet::insertPacket(
@@ -82,7 +87,7 @@ Packet& Packet::insertPacket(
 
 Packet& Packet::fixCRC() {
   int crcIndexEnd = len - tailLen;
-  uint16_t crc = CRC16.kermit(data + headLen, crcIndexEnd - headLen - 2);
+  uint16_t crc = crcFunc(data + headLen, crcIndexEnd - headLen - 2);
 
   data[crcIndexEnd - 1] = isBigEndianCRC ? lowByte(crc) : highByte(crc);
   data[crcIndexEnd - 2] = isBigEndianCRC ? highByte(crc) : lowByte(crc);
@@ -103,7 +108,7 @@ Packet& Packet::clear() {
   if (data != nullptr) {
     free(data);
     data = nullptr;
-}
+  }
   data = (uint8_t*)malloc(cap * sizeof(uint8_t));
 #endif
   return *this;
