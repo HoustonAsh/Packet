@@ -11,10 +11,10 @@ Packet::Packet() {
 }
 
 Packet::Packet(
-  uint8_t* payload, uint16_t buffSize,
+  const uint8_t* payload, uint16_t buffSize,
   bool isBigEndianCRC,
-  uint8_t* head, uint8_t headLen,
-  uint8_t* tail, uint8_t tailLen,
+  const uint8_t* head, uint8_t headLen,
+  const uint8_t* tail, uint8_t tailLen,
   CrcFunc crcF
 ) {
   this->crcFunc = crcF;
@@ -66,10 +66,10 @@ bool Packet::checkCRC() {
 }
 
 Packet& Packet::insertPacket(
-  uint8_t* buf, uint16_t buffSize,
+  const uint8_t* buf, uint16_t buffSize,
   bool isBigEndianCRC,
-  uint8_t* head, int headLen,
-  uint8_t* tail, int tailLen
+  const uint8_t* head, int headLen,
+  const uint8_t* tail, int tailLen
 ) {
   this->isBigEndianCRC = isBigEndianCRC;
   if (head != nullptr) memcpy(this->head, head, headLen);

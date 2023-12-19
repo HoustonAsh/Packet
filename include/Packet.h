@@ -63,20 +63,21 @@ protected:
 public:
   Packet();
   Packet(
-    uint8_t* payload, uint16_t buffSize,
+    const uint8_t* payload, uint16_t buffSize,
     bool isBigEndianCRC = false,
-    uint8_t* head = nullptr, uint8_t headLen = 0,
-    uint8_t* tail = nullptr, uint8_t tailLen = 0,
+    const uint8_t* head = nullptr, uint8_t headLen = 0,
+    const uint8_t* tail = nullptr, uint8_t tailLen = 0,
     CrcFunc crcF = [](const uint8_t* data, uint16_t datalen) { return fastCRC.kermit(data, datalen); }
   );
 
   Packet(
-    uint8_t* payload, uint16_t buffSize,
+    const uint8_t* payload, uint16_t buffSize,
     CrcFunc crcF,
     bool isBigEndianCRC = false,
-    uint8_t* head = nullptr, uint8_t headLen = 0,
-    uint8_t* tail = nullptr, uint8_t tailLen = 0
-  ) : Packet(payload, buffSize, isBigEndianCRC, head, headLen, tail, tailLen, crcF) {}
+    const uint8_t* head = nullptr, uint8_t headLen = 0,
+    const uint8_t* tail = nullptr, uint8_t tailLen = 0
+  ) : Packet(payload, buffSize, isBigEndianCRC, head, headLen, tail, tailLen, crcF) {
+  }
 
   ~Packet();
   uint16_t size();
@@ -85,10 +86,10 @@ public:
   Packet& operator= (Packet& a);
   Packet& fixCRC();
   Packet& insertPacket(
-    uint8_t* buf, uint16_t bufferSize,
+    const uint8_t* buf, uint16_t bufferSize,
     bool isBigEndianCRC = false,
-    uint8_t* head = nullptr, int headLen = 0,
-    uint8_t* tail = nullptr, int tailLen = 0
+    const uint8_t* head = nullptr, int headLen = 0,
+    const uint8_t* tail = nullptr, int tailLen = 0
   );
 
   bool checkCRC();

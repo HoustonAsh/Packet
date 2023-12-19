@@ -1,6 +1,6 @@
 {
 	"name": "Packet",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "A simple packet management library for Arduino and other embedded platforms designed for various communication protocols.",
 	"keywords": "serial, messaging, radio signal, LoRa, arduino",
 	"authors": {
