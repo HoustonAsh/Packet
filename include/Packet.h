@@ -45,7 +45,7 @@ private:
 #endif
 protected:
   typedef uint16_t(*CrcFunc)(const uint8_t* data, uint16_t datalen);
-  CrcFunc crcFunc;
+  CrcFunc crcFunc = [](const uint8_t* data, uint16_t datalen) { return fastCRC.kermit(data, datalen); };
   uint16_t len;
   bool isBigEndianCRC;
 
@@ -67,7 +67,7 @@ public:
     bool isBigEndianCRC = false,
     const uint8_t* head = nullptr, uint8_t headLen = 0,
     const uint8_t* tail = nullptr, uint8_t tailLen = 0,
-    CrcFunc crcF = [](const uint8_t* data, uint16_t datalen) { return fastCRC.kermit(data, datalen); }
+    CrcFunc crcF = nullptr
   );
 
   Packet(

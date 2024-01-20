@@ -17,7 +17,7 @@ Packet::Packet(
   const uint8_t* tail, uint8_t tailLen,
   CrcFunc crcF
 ) {
-  this->crcFunc = crcF;
+  if (crcF != nullptr) this->crcFunc = crcF;
   this->isBigEndianCRC = isBigEndianCRC;
   if (head != nullptr) memcpy(this->head, head, headLen);
   if (tail != nullptr) memcpy(this->tail, tail, tailLen);
@@ -95,12 +95,14 @@ Packet& Packet::fixCRC() {
 }
 
 bool Packet::isValid() {
-  return len > headLen + tailLen + 2 &&
+  uint8_t bbuf[16];
+  memcpy(bbuf, data + len - tailLen, tailLen);
+
+  return int(len) > headLen + tailLen + 2 &&
     !memcmp(data, head, headLen) &&
-    !memcmp(data + len - tailLen, tail, tailLen) &&
+    !memcmp(bbuf, tail, tailLen) &&
     checkCRC();
 }
-
 Packet& Packet::clear() {
   len = 0;
 #ifdef PACKET_BUFFER_SIZE
