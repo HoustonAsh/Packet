@@ -135,6 +135,8 @@ Packet& Packet::operator= (Packet& a) {
   this->tailLen = a.tailLen;
   memcpy(this->head, a.head, a.headLen);
   memcpy(this->tail, a.tail, a.tailLen);
+  this->isBigEndianCRC = a.isBigEndianCRC;
+  this->crcFunc = a.crcFunc;
   return *this;
 }
 
