@@ -27,7 +27,7 @@
 #define bytesToInt16(buf, startIndex) (((int16_t)buf[startIndex] << 8)  | (int16_t)buf[startIndex + 1])
 #define intToByte(v, i) (uint8_t)(v >> 8*i & 0xff)
 
-#ifndef PACKET_BUFFER_SIZE
+#ifndef PACKET_STACK_SIZE
 #define PACKET_STACK_SIZE 128
 #endif
 

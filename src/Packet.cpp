@@ -3,9 +3,9 @@
 FastCRC16 fastCRC;
 
 Packet::Packet() {
+  len = 0;
 #ifdef PACKET_BUFFER_SIZE
   cap = PACKET_BUFFER_SIZE;
-  len = 0;
   data = (uint8_t*)malloc(cap * sizeof(uint8_t));
 #endif
 }
@@ -19,8 +19,14 @@ Packet::Packet(
 ) {
   if (crcF != nullptr) this->crcFunc = crcF;
   this->isBigEndianCRC = isBigEndianCRC;
-  if (head != nullptr) memcpy(this->head, head, headLen);
-  if (tail != nullptr) memcpy(this->tail, tail, tailLen);
+  if (head != nullptr) {
+    memcpy(this->head, head, headLen);
+    this->headLen = headLen;
+  }
+  if (tail != nullptr) {
+    memcpy(this->tail, tail, tailLen);
+    this->tailLen = tailLen;
+  }
 
 #ifdef PACKET_BUFFER_SIZE
   cap = PACKET_BUFFER_SIZE;
@@ -72,8 +78,14 @@ Packet& Packet::insertPacket(
   const uint8_t* tail, int tailLen
 ) {
   this->isBigEndianCRC = isBigEndianCRC;
-  if (head != nullptr) memcpy(this->head, head, headLen);
-  if (tail != nullptr) memcpy(this->tail, tail, tailLen);
+  if (head != nullptr) {
+    memcpy(this->head, head, headLen);
+    this->headLen = headLen;
+  }
+  if (tail != nullptr) {
+    memcpy(this->tail, tail, tailLen);
+    this->tailLen = tailLen;
+  }
 #ifdef PACKET_BUFFER_SIZE
   while (cap < buffSize + headLen + tailLen + 2)
     cap <<= 1;
@@ -119,6 +131,10 @@ Packet& Packet::clear() {
 Packet& Packet::operator= (Packet& a) {
   if (this == &a) return *this;
   insertPacket(a.data, a.size());
+  this->headLen = a.headLen;
+  this->tailLen = a.tailLen;
+  memcpy(this->head, a.head, a.headLen);
+  memcpy(this->tail, a.tail, a.tailLen);
   return *this;
 }
 
